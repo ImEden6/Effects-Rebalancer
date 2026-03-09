@@ -1,0 +1,9 @@
+{
+    "effects-rebalancer.midnightconfig.title": "Effects Rebalancer Config",
+    "effects-rebalancer.midnightconfig.resistanceModifier": "Resistance Modifier",
+    "effects-rebalancer.midnightconfig.resistanceModifier.tooltip": "Damage reduction per level. 0.20 = 20% reduction.",
+    "effects-rebalancer.midnightconfig.regenerationAmount": "Regeneration Amount",
+    "effects-rebalancer.midnightconfig.regenerationAmount.tooltip": "Health points healed per activation. 1.0 = half a heart.",
+    "effects-rebalancer.midnightconfig.absorptionAmount": "Absorption Amount",
+    "effects-rebalancer.midnightconfig.absorptionAmount.tooltip": "Absorption points added per level. 4 = two hearts."
+}
