@@ -14,7 +14,7 @@ public class AbsorptionMixin {
         return SyncedConfig.absorptionAmount;
     }
 
-    @ModifyConstant(method = "removed", constant = @Constant(intValue = 4))
+    @ModifyConstant(method = "onRemoved", constant = @Constant(intValue = 4))
     private int modifyAbsorptionRemoved(int constant) {
         return SyncedConfig.absorptionAmount;
     }

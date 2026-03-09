@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,12 +71,12 @@ public class EffectsRebalancerMod implements ModInitializer {
                                                 // Must be OP level 2+
                                                 if (player.hasPermissionLevel(2)) {
                                                         // Bounds validation & Silent Clamping
-                                                        EffectsConfig.resistanceModifier = clamp(proposedResistance,
-                                                                        0.0, 1.0);
-                                                        EffectsConfig.regenerationAmount = clamp(proposedRegeneration,
-                                                                        0.0f, 20.0f);
-                                                        EffectsConfig.absorptionAmount = Math.max(0,
-                                                                        Math.min(proposedAbsorption, 100));
+                                                        EffectsConfig.resistanceModifier = MathHelper
+                                                                        .clamp(proposedResistance, 0.0, 1.0);
+                                                        EffectsConfig.regenerationAmount = MathHelper
+                                                                        .clamp(proposedRegeneration, 0.0f, 20.0f);
+                                                        EffectsConfig.absorptionAmount = MathHelper
+                                                                        .clamp(proposedAbsorption, 0, 100);
 
                                                         // Write to local server disk first via MidnightConfig save
                                                         // mechanism
@@ -110,13 +111,5 @@ public class EffectsRebalancerMod implements ModInitializer {
                 buf.writeFloat(EffectsConfig.regenerationAmount);
                 buf.writeInt(EffectsConfig.absorptionAmount);
                 return buf;
-        }
-
-        private double clamp(double value, double min, double max) {
-                return Math.max(min, Math.min(max, value));
-        }
-
-        private float clamp(float value, float min, float max) {
-                return Math.max(min, Math.min(max, value));
         }
 }
