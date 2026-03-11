@@ -5,12 +5,18 @@ public class SyncedConfig {
     // server updates it
     public static volatile double resistanceModifier = EffectsConfig.resistanceModifier;
     public static volatile float regenerationAmount = EffectsConfig.regenerationAmount;
+    public static volatile boolean enableMaxHealthRegen = EffectsConfig.enableMaxHealthRegen;
+    public static volatile float regenerationMaxHealthPercentage = EffectsConfig.regenerationMaxHealthPercentage;
+    public static volatile int healingCooldownTicks = EffectsConfig.healingCooldownTicks;
     public static volatile int absorptionAmount = EffectsConfig.absorptionAmount;
 
     // Copies the standard local disk values into the active synced configuration
     public static void reset() {
         resistanceModifier = EffectsConfig.resistanceModifier;
         regenerationAmount = EffectsConfig.regenerationAmount;
+        enableMaxHealthRegen = EffectsConfig.enableMaxHealthRegen;
+        regenerationMaxHealthPercentage = EffectsConfig.regenerationMaxHealthPercentage;
+        healingCooldownTicks = EffectsConfig.healingCooldownTicks;
         absorptionAmount = EffectsConfig.absorptionAmount;
     }
 }

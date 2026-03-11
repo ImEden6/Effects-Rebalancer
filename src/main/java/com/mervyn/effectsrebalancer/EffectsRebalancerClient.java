@@ -15,6 +15,9 @@ public class EffectsRebalancerClient implements ClientModInitializer {
     // change anything
     private double lastSentResistance = EffectsConfig.resistanceModifier;
     private float lastSentRegeneration = EffectsConfig.regenerationAmount;
+    private boolean lastSentMaxHealthRegen = EffectsConfig.enableMaxHealthRegen;
+    private float lastSentRegenMaxHealthPercentage = EffectsConfig.regenerationMaxHealthPercentage;
+    private int lastSentCooldown = EffectsConfig.healingCooldownTicks;
     private int lastSentAbsorption = EffectsConfig.absorptionAmount;
 
     @Override
@@ -31,6 +34,9 @@ public class EffectsRebalancerClient implements ClientModInitializer {
                     // Read fields in explicit order: double, float, int
                     double syncedResistance = buf.readDouble();
                     float syncedRegeneration = buf.readFloat();
+                    boolean syncedEnableMaxHealthRegen = buf.readBoolean();
+                    float syncedRegenMaxHealthPercentage = buf.readFloat();
+                    int syncedTicks = buf.readInt();
                     int syncedAbsorption = buf.readInt();
 
                     client.execute(() -> {
@@ -38,6 +44,9 @@ public class EffectsRebalancerClient implements ClientModInitializer {
                         // untouched
                         SyncedConfig.resistanceModifier = syncedResistance;
                         SyncedConfig.regenerationAmount = syncedRegeneration;
+                        SyncedConfig.enableMaxHealthRegen = syncedEnableMaxHealthRegen;
+                        SyncedConfig.regenerationMaxHealthPercentage = syncedRegenMaxHealthPercentage;
+                        SyncedConfig.healingCooldownTicks = syncedTicks;
                         SyncedConfig.absorptionAmount = syncedAbsorption;
                         EffectsRebalancerMod.LOGGER.info(
                                 "Config synced from server: Resistance={}, Regen={}, Absorption={}",
@@ -53,7 +62,7 @@ public class EffectsRebalancerClient implements ClientModInitializer {
                 // If any value changed compared to what we last sent, and we're currently on a
                 // server (networkHandler != null)
                 boolean changed = (lastSentResistance != EffectsConfig.resistanceModifier) ||
-                        (lastSentRegeneration != EffectsConfig.regenerationAmount) ||
+                        (lastSentRegeneration != EffectsConfig.regenerationAmount) || (lastSentMaxHealthRegen != EffectsConfig.enableMaxHealthRegen) || (lastSentRegenMaxHealthPercentage != EffectsConfig.regenerationMaxHealthPercentage) || (lastSentCooldown != EffectsConfig.healingCooldownTicks) ||
                         (lastSentAbsorption != EffectsConfig.absorptionAmount);
 
                 // We also only want to send this if we are actively connected to a server.
@@ -61,6 +70,9 @@ public class EffectsRebalancerClient implements ClientModInitializer {
                     PacketByteBuf buf = PacketByteBufs.create();
                     buf.writeDouble(EffectsConfig.resistanceModifier);
                     buf.writeFloat(EffectsConfig.regenerationAmount);
+                    buf.writeBoolean(EffectsConfig.enableMaxHealthRegen);
+                    buf.writeFloat(EffectsConfig.regenerationMaxHealthPercentage);
+                    buf.writeInt(EffectsConfig.healingCooldownTicks);
                     buf.writeInt(EffectsConfig.absorptionAmount);
 
                     ClientPlayNetworking.send(EffectsRebalancerMod.UPDATE_CONFIG_PACKET_ID, buf);
@@ -70,6 +82,9 @@ public class EffectsRebalancerClient implements ClientModInitializer {
                     // times
                     lastSentResistance = EffectsConfig.resistanceModifier;
                     lastSentRegeneration = EffectsConfig.regenerationAmount;
+                    lastSentMaxHealthRegen = EffectsConfig.enableMaxHealthRegen;
+                    lastSentRegenMaxHealthPercentage = EffectsConfig.regenerationMaxHealthPercentage;
+                    lastSentCooldown = EffectsConfig.healingCooldownTicks;
                     lastSentAbsorption = EffectsConfig.absorptionAmount;
                 }
             }

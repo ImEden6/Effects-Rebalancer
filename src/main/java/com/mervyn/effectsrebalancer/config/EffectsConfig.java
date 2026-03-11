@@ -9,6 +9,15 @@ public class EffectsConfig extends MidnightConfig {
     @Entry
     public static float regenerationAmount = 1.0f; // 1 HP (0.5 hearts)
 
+    @Entry
+    public static boolean enableMaxHealthRegen = false; // Enable custom regen logic
+
+    @Entry(min = 0.0f, max = 1.0f)
+    public static float regenerationMaxHealthPercentage = 0.02f; // 2% of Max Health healed per second, per level
+
+    @Entry
+    public static int healingCooldownTicks = 20; // The amount of ticks that should pass before a healing is attempted
+
     @Entry(min = 0, max = 100)
     public static int absorptionAmount = 4; // 4 points (2 hearts) per level
 }
