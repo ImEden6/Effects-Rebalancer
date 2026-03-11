@@ -41,9 +41,7 @@ public class EffectsRebalancerMod implements ModInitializer {
                                 EffectsConfig.absorptionAmount);
 
                 // Queue players for sync upon joining
-                ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-                        pendingSyncPlayers.add(handler.player.getUuid());
-                });
+                ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> pendingSyncPlayers.add(handler.player.getUuid()));
 
                 // Execute sync on the very next Server Tick after JOIN
                 ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -65,6 +63,9 @@ public class EffectsRebalancerMod implements ModInitializer {
                                         // Read client intent first
                                         double proposedResistance = buf.readDouble();
                                         float proposedRegeneration = buf.readFloat();
+                                        boolean proposedMaxHealthRegen = buf.readBoolean();
+                                        float proposedRegenMaxHealthPercentage = buf.readFloat();
+                                        int proposedCooldown = buf.readInt();
                                         int proposedAbsorption = buf.readInt();
 
                                         server.execute(() -> {
@@ -75,6 +76,11 @@ public class EffectsRebalancerMod implements ModInitializer {
                                                                         .clamp(proposedResistance, 0.0, 1.0);
                                                         EffectsConfig.regenerationAmount = MathHelper
                                                                         .clamp(proposedRegeneration, 0.0f, 20.0f);
+                                                        EffectsConfig.enableMaxHealthRegen = proposedMaxHealthRegen;
+                                                        EffectsConfig.regenerationMaxHealthPercentage = MathHelper
+                                                                        .clamp(proposedRegenMaxHealthPercentage, 0.0f, 1.0f);
+                                                        EffectsConfig.healingCooldownTicks = MathHelper
+                                                                        .clamp(proposedCooldown, 0, 1200);
                                                         EffectsConfig.absorptionAmount = MathHelper
                                                                         .clamp(proposedAbsorption, 0, 100);
 
@@ -109,6 +115,9 @@ public class EffectsRebalancerMod implements ModInitializer {
                 // Write fields in explicit order: double, float, int
                 buf.writeDouble(EffectsConfig.resistanceModifier);
                 buf.writeFloat(EffectsConfig.regenerationAmount);
+                buf.writeBoolean(EffectsConfig.enableMaxHealthRegen);
+                buf.writeFloat(EffectsConfig.regenerationMaxHealthPercentage);
+                buf.writeInt(EffectsConfig.healingCooldownTicks);
                 buf.writeInt(EffectsConfig.absorptionAmount);
                 return buf;
         }
