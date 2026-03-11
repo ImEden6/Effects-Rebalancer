@@ -17,7 +17,7 @@ public abstract class ResistanceMixin {
     // Disable Vanilla Resistance Logic by pretending we don't have the effect
     @Redirect(method = "modifyAppliedDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z"))
     private boolean disableVanillaResistance(LivingEntity instance, StatusEffect effect) {
-        if (effect.getTranslationKey().equals("effect.minecraft.resistance")) {
+        if ("effect.minecraft.resistance".equals(effect.getTranslationKey())) {
             return false;
         }
         return instance.hasStatusEffect(effect);
@@ -28,24 +28,26 @@ public abstract class ResistanceMixin {
     private float customResistance(float amount, DamageSource source) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
-        // Check standard bypass logic (bypasses magic usually bypasses resistance)
-        if (!source.isIn(DamageTypeTags.BYPASSES_RESISTANCE)) {
-            StatusEffectInstance resistanceEffect = null;
-            for (StatusEffectInstance instanceEffect : entity.getStatusEffects()) {
-                if (instanceEffect.getEffectType().getTranslationKey().equals("effect.minecraft.resistance")) {
-                    resistanceEffect = instanceEffect;
-                    break;
-                }
-            }
-            
-            if (resistanceEffect != null) {
-                int amplifier = (resistanceEffect.getAmplifier() + 1);
-                float reduction = Math.min((float) (amplifier * SyncedConfig.resistanceModifier), 1.0F);
+        if (source.isIn(DamageTypeTags.BYPASSES_RESISTANCE)) {
+            return amount;
+        }
 
-                float newAmount = amount * (1.0F - reduction);
-                return Math.max(newAmount, 0.0F);
+        StatusEffectInstance resistanceEffect = null;
+        for (StatusEffectInstance instanceEffect : entity.getStatusEffects()) {
+            if ("effect.minecraft.resistance".equals(instanceEffect.getEffectType().getTranslationKey())) {
+                resistanceEffect = instanceEffect;
+                break;
             }
         }
+        
+        if (resistanceEffect != null) {
+            int amplifier = (resistanceEffect.getAmplifier() + 1);
+            float reduction = Math.min((float) (amplifier * SyncedConfig.resistanceModifier), 1.0F);
+
+            float newAmount = amount * (1.0F - reduction);
+            return Math.max(newAmount, 0.0F);
+        }
+
         return amount;
     }
 }
