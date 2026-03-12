@@ -13,6 +13,7 @@ public class EffectsRebalancerClient implements ClientModInitializer {
 
     // Store the last sent values to avoid spamming the server if the player didn't
     // change anything
+    private boolean lastSentCustomResistanceFormula = EffectsConfig.enableCustomResistanceFormula;
     private double lastSentResistance = EffectsConfig.resistanceModifier;
     private float lastSentRegeneration = EffectsConfig.regenerationAmount;
     private boolean lastSentMaxHealthRegen = EffectsConfig.enableMaxHealthRegen;
@@ -32,6 +33,7 @@ public class EffectsRebalancerClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(EffectsRebalancerMod.SYNC_CONFIG_PACKET_ID,
                 (client, handler, buf, responseSender) -> {
                     // Read fields in explicit order: double, float, int
+                    boolean syncedCustomResistanceFormula = buf.readBoolean();
                     double syncedResistance = buf.readDouble();
                     float syncedRegeneration = buf.readFloat();
                     boolean syncedEnableMaxHealthRegen = buf.readBoolean();
@@ -42,6 +44,7 @@ public class EffectsRebalancerClient implements ClientModInitializer {
                     client.execute(() -> {
                         // Apply ONLY to the in-memory SyncedConfig proxy, leaving the local disk
                         // untouched
+                        SyncedConfig.enableCustomResistanceFormula = syncedCustomResistanceFormula;
                         SyncedConfig.resistanceModifier = syncedResistance;
                         SyncedConfig.regenerationAmount = syncedRegeneration;
                         SyncedConfig.enableMaxHealthRegen = syncedEnableMaxHealthRegen;
@@ -61,13 +64,14 @@ public class EffectsRebalancerClient implements ClientModInitializer {
 
                 // If any value changed compared to what we last sent, and we're currently on a
                 // server (networkHandler != null)
-                boolean changed = (lastSentResistance != EffectsConfig.resistanceModifier) ||
+                boolean changed = (lastSentCustomResistanceFormula != EffectsConfig.enableCustomResistanceFormula) || (lastSentResistance != EffectsConfig.resistanceModifier) ||
                         (lastSentRegeneration != EffectsConfig.regenerationAmount) || (lastSentMaxHealthRegen != EffectsConfig.enableMaxHealthRegen) || (lastSentRegenMaxHealthPercentage != EffectsConfig.regenerationMaxHealthPercentage) || (lastSentCooldown != EffectsConfig.healingCooldownTicks) ||
                         (lastSentAbsorption != EffectsConfig.absorptionAmount);
 
                 // We also only want to send this if we are actively connected to a server.
                 if (changed && ClientPlayNetworking.canSend(EffectsRebalancerMod.UPDATE_CONFIG_PACKET_ID)) {
                     PacketByteBuf buf = PacketByteBufs.create();
+                    buf.writeBoolean(EffectsConfig.enableCustomResistanceFormula);
                     buf.writeDouble(EffectsConfig.resistanceModifier);
                     buf.writeFloat(EffectsConfig.regenerationAmount);
                     buf.writeBoolean(EffectsConfig.enableMaxHealthRegen);
@@ -80,6 +84,7 @@ public class EffectsRebalancerClient implements ClientModInitializer {
 
                     // Update tracked variables to avoid resending the same changed values multiple
                     // times
+                    lastSentCustomResistanceFormula = EffectsConfig.enableCustomResistanceFormula;
                     lastSentResistance = EffectsConfig.resistanceModifier;
                     lastSentRegeneration = EffectsConfig.regenerationAmount;
                     lastSentMaxHealthRegen = EffectsConfig.enableMaxHealthRegen;

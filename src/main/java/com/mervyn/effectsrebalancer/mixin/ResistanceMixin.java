@@ -5,6 +5,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.registry.tag.DamageTypeTags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +18,7 @@ public abstract class ResistanceMixin {
     // Disable Vanilla Resistance Logic by pretending we don't have the effect
     @Redirect(method = "modifyAppliedDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z"))
     private boolean disableVanillaResistance(LivingEntity instance, StatusEffect effect) {
-        if ("effect.minecraft.resistance".equals(effect.getTranslationKey())) {
+        if (effect == StatusEffects.RESISTANCE) {
             return false;
         }
         return instance.hasStatusEffect(effect);
@@ -32,19 +33,18 @@ public abstract class ResistanceMixin {
             return amount;
         }
 
-        StatusEffectInstance resistanceEffect = null;
-        for (StatusEffectInstance instanceEffect : entity.getStatusEffects()) {
-            if ("effect.minecraft.resistance".equals(instanceEffect.getEffectType().getTranslationKey())) {
-                resistanceEffect = instanceEffect;
-                break;
-            }
-        }
-        
-        if (resistanceEffect != null) {
-            int amplifier = (resistanceEffect.getAmplifier() + 1);
-            float reduction = Math.min((float) (amplifier * SyncedConfig.resistanceModifier), 1.0F);
+        StatusEffectInstance resistance = entity.getStatusEffect(StatusEffects.RESISTANCE);
+        if (resistance != null) {
+            int level = resistance.getAmplifier() + 1;
 
-            float newAmount = amount * (1.0F - reduction);
+            // Linear resistance formula
+            double reduction = Math.min(level * SyncedConfig.resistanceModifier, 1.0F);
+            if (SyncedConfig.enableCustomResistanceFormula) {
+                // Custom resistance formula
+                reduction = 1.0 - Math.pow(1.0 - SyncedConfig.resistanceModifier, level);
+            }
+
+            float newAmount = (float) (amount * (1.0 - reduction));
             return Math.max(newAmount, 0.0F);
         }
 

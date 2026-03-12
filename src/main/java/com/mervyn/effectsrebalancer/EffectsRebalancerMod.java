@@ -61,6 +61,7 @@ public class EffectsRebalancerMod implements ModInitializer {
                 ServerPlayNetworking.registerGlobalReceiver(UPDATE_CONFIG_PACKET_ID,
                                 (server, player, handler, buf, responseSender) -> {
                                         // Read client intent first
+                                        boolean proposedCustomResistanceFormula = buf.readBoolean();
                                         double proposedResistance = buf.readDouble();
                                         float proposedRegeneration = buf.readFloat();
                                         boolean proposedMaxHealthRegen = buf.readBoolean();
@@ -72,6 +73,7 @@ public class EffectsRebalancerMod implements ModInitializer {
                                                 // Must be OP level 2+
                                                 if (player.hasPermissionLevel(2)) {
                                                         // Bounds validation & Silent Clamping
+                                                        EffectsConfig.enableCustomResistanceFormula = proposedCustomResistanceFormula;
                                                         EffectsConfig.resistanceModifier = MathHelper
                                                                         .clamp(proposedResistance, 0.0, 1.0);
                                                         EffectsConfig.regenerationAmount = MathHelper
@@ -113,6 +115,7 @@ public class EffectsRebalancerMod implements ModInitializer {
         private PacketByteBuf createSyncPacket() {
                 PacketByteBuf buf = PacketByteBufs.create();
                 // Write fields in explicit order: double, float, int
+                buf.writeBoolean(EffectsConfig.enableCustomResistanceFormula);
                 buf.writeDouble(EffectsConfig.resistanceModifier);
                 buf.writeFloat(EffectsConfig.regenerationAmount);
                 buf.writeBoolean(EffectsConfig.enableMaxHealthRegen);
